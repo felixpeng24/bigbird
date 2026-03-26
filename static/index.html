@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1024, initial-scale=1.0">
+    <title>BIG BIRD IS WATCHING YOU</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div id="container">
+        <!-- IDLE phase -->
+        <div id="phase-IDLE" class="phase active">
+            <h1>BIG BIRD IS WATCHING YOU</h1>
+            <p class="prompt">PRESS THE BUTTON TO BE EVALUATED</p>
+            <img id="camera-feed" src="/api/video_feed" alt="Camera Feed">
+        </div>
+
+        <!-- CAPTURING phase -->
+        <div id="phase-CAPTURING" class="phase">
+            <h1>CAPTURING</h1>
+            <p class="phase-label">Hold still...</p>
+        </div>
+
+        <!-- ANALYZING phase -->
+        <div id="phase-ANALYZING" class="phase">
+            <h1>ANALYZING</h1>
+            <p class="phase-label">Processing your image...</p>
+        </div>
+
+        <!-- CALCULATING phase -->
+        <div id="phase-CALCULATING" class="phase">
+            <h1>CALCULATING</h1>
+            <p class="phase-label">Computing results...</p>
+        </div>
+
+        <!-- REVEALING phase -->
+        <div id="phase-REVEALING" class="phase">
+            <h1>REVEALING</h1>
+            <p class="phase-label">Here it comes...</p>
+        </div>
+
+        <!-- RESETTING phase -->
+        <div id="phase-RESETTING" class="phase">
+            <h1>RESETTING</h1>
+            <p class="phase-label">Returning to idle...</p>
+        </div>
+
+        <!-- Debug status -->
+        <div id="debug-status">
+            Phase: <span id="debug-phase">IDLE</span> |
+            Socket: <span id="debug-socket">connecting...</span>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>
