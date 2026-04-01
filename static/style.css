@@ -1,21 +1,72 @@
-/* Big Bird — minimal functional styling for 1024×600 Pi display */
+/*
+ * Big Bird — Clay swirl aesthetic
+ *
+ * Palette derived from background1.png: black, mustard/gold, warm amber.
+ * Chunky rounded type, claymation feel. No CSS gradient blobs.
+ * Target: 1024×600 (7" Pi display), readable at 3-5 feet.
+ */
 
+/* -----------------------------------------------------------------------
+   Reset & Foundation
+   ----------------------------------------------------------------------- */
 *, *::before, *::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+:root {
+    --black: #0c0c0c;
+    --gold: #d4a843;
+    --gold-bright: #f0c95c;
+    --gold-dim: #a07e2e;
+    --amber: #c8901a;
+    --cream: #f5ecd7;
+    --white: #fff;
+    --text-dim: rgba(245, 236, 215, 0.5);
+    --card-bg: rgba(12, 12, 12, 0.75);
+    --card-border: rgba(212, 168, 67, 0.3);
+    --red: #e03030;
+    --green: #5cb85c;
+
+    --font-display: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', cursive;
+    --font-body: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', cursive;
+
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+}
+
 html, body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: #0a0a12;
-    color: #e8e8e8;
-    font-family: "Courier New", Courier, monospace;
+    background: var(--black);
+    color: var(--cream);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
+/* -----------------------------------------------------------------------
+   Background Image
+   ----------------------------------------------------------------------- */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: url('/static/background1.png') center center / cover no-repeat;
+    opacity: 0.35;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* -----------------------------------------------------------------------
+   Container
+   ----------------------------------------------------------------------- */
 #container {
+    position: relative;
+    z-index: 1;
     width: 100%;
     max-width: 1024px;
     height: 100%;
@@ -24,16 +75,16 @@ html, body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    position: relative;
 }
 
 /* -----------------------------------------------------------------------
-   Phase visibility
+   Phase Visibility
    ----------------------------------------------------------------------- */
 .phase {
     display: none;
     text-align: center;
     width: 100%;
+    padding: 1rem 2rem;
 }
 
 .phase.active {
@@ -41,53 +92,361 @@ html, body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    min-height: 80vh;
+    animation: phaseIn 0.35s ease-out;
+}
+
+@keyframes phaseIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* -----------------------------------------------------------------------
+   Cards
+   ----------------------------------------------------------------------- */
+.card {
+    background: var(--card-bg);
+    border: 2px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 3rem;
+    max-width: 660px;
+    width: 100%;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 /* -----------------------------------------------------------------------
    Typography
    ----------------------------------------------------------------------- */
-h1 {
-    font-size: 2.4rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
+h1, h2 {
+    font-family: var(--font-display);
     text-transform: uppercase;
-    color: #ffffff;
-    margin-bottom: 0.5rem;
+    line-height: 1.1;
 }
 
-.prompt {
-    font-size: 1.1rem;
-    letter-spacing: 0.2em;
-    color: #888;
-    margin-bottom: 1.5rem;
+h2 {
+    font-size: 2rem;
+    color: var(--gold-bright);
+    margin-bottom: 1.2rem;
+    letter-spacing: 0.03em;
 }
 
 .phase-label {
-    font-size: 1.3rem;
-    color: #aaa;
-    margin-top: 1rem;
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+    margin-top: 0.6rem;
 }
 
 /* -----------------------------------------------------------------------
-   Camera feed
+   IDLE Phase
    ----------------------------------------------------------------------- */
+.idle-title-block {
+    margin-bottom: 0.8rem;
+}
+
+.title-main {
+    font-size: 4.2rem;
+    color: var(--gold-bright);
+    text-shadow: 3px 3px 0 var(--gold-dim);
+    letter-spacing: 0.04em;
+}
+
+.title-sub {
+    font-size: 2.4rem;
+    color: var(--cream);
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.6);
+    letter-spacing: 0.06em;
+}
+
+.camera-wrapper {
+    position: relative;
+    display: inline-block;
+    margin: 0.6rem 0;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 3px solid var(--gold);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+}
+
 #camera-feed {
     display: block;
-    max-width: 640px;
-    width: 100%;
-    border: 2px solid #333;
-    margin: 0 auto;
+    width: 480px;
+    max-width: 100%;
+    min-height: 320px;
+    object-fit: cover;
+    border-radius: calc(var(--radius-md) - 3px);
+    background: #111;
+}
+
+/* Surveillance corners */
+.camera-corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-color: var(--gold-bright);
+    border-style: solid;
+    border-width: 0;
+    opacity: 0.7;
+}
+.camera-corner.tl { top: 6px; left: 6px; border-top-width: 2px; border-left-width: 2px; }
+.camera-corner.tr { top: 6px; right: 6px; border-top-width: 2px; border-right-width: 2px; }
+.camera-corner.bl { bottom: 6px; left: 6px; border-bottom-width: 2px; border-left-width: 2px; }
+.camera-corner.br { bottom: 6px; right: 6px; border-bottom-width: 2px; border-right-width: 2px; }
+
+.rec-indicator {
+    position: absolute;
+    top: 10px;
+    right: 34px;
+    font-family: var(--font-body);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--red);
+    letter-spacing: 0.1em;
+    animation: recBlink 1.2s steps(1) infinite;
+}
+
+@keyframes recBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.prompt {
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    color: var(--gold);
+    margin-top: 0.8rem;
 }
 
 /* -----------------------------------------------------------------------
-   Debug status
+   CAPTURING Phase
+   ----------------------------------------------------------------------- */
+.capturing-card {
+    border-color: var(--gold);
+}
+
+.flash-overlay {
+    position: fixed;
+    inset: 0;
+    background: white;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 100;
+    animation: cameraFlash 0.5s ease-out;
+}
+
+@keyframes cameraFlash {
+    0% { opacity: 0.7; }
+    100% { opacity: 0; }
+}
+
+.capture-dots {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 1.2rem;
+}
+
+.capture-dots .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--gold);
+    animation: dotPulse 1.4s ease-in-out infinite;
+}
+.capture-dots .dot:nth-child(2) { animation-delay: 0.2s; }
+.capture-dots .dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dotPulse {
+    0%, 80%, 100% { transform: scale(0.5); opacity: 0.3; }
+    40% { transform: scale(1); opacity: 1; }
+}
+
+/* -----------------------------------------------------------------------
+   ANALYZING Phase
+   ----------------------------------------------------------------------- */
+.analyzing-card {
+    border-color: var(--gold-dim);
+}
+
+#demographic-list {
+    text-align: left;
+    width: 100%;
+}
+
+.demographic-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 1rem;
+    margin: 0.35rem 0;
+    background: rgba(212, 168, 67, 0.08);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    animation: demoSlide 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-size: 1.15rem;
+}
+
+.demo-label {
+    color: var(--text-dim);
+    font-size: 0.8em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.demo-value {
+    color: var(--cream);
+    font-weight: 700;
+}
+
+@keyframes demoSlide {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Refusal */
+.refusal-text {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    color: var(--red);
+    margin-top: 1.2rem;
+    animation: refusalShake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+@keyframes refusalShake {
+    10%, 90% { transform: translateX(-2px); }
+    20%, 80% { transform: translateX(4px); }
+    30%, 50%, 70% { transform: translateX(-5px); }
+    40%, 60% { transform: translateX(5px); }
+}
+
+.hidden { display: none !important; }
+
+/* -----------------------------------------------------------------------
+   CALCULATING Phase
+   ----------------------------------------------------------------------- */
+.calculating-card {
+    border-color: var(--green);
+}
+
+.calculating-card h2 {
+    color: var(--green);
+}
+
+#jargon-container {
+    text-align: left;
+    width: 100%;
+    max-height: 220px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    margin-bottom: 0.8rem;
+}
+#jargon-container::-webkit-scrollbar { display: none; }
+
+.jargon-line {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: var(--green);
+    padding: 0.2rem 0;
+    animation: typeIn 0.25s ease-out;
+    opacity: 0.8;
+}
+
+@keyframes typeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 0.8; transform: translateY(0); }
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--green);
+    border-radius: 4px;
+    transition: width 0.5s ease-out;
+}
+
+/* -----------------------------------------------------------------------
+   REVEALING Phase
+   ----------------------------------------------------------------------- */
+.reveal-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.reveal-header {
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    color: var(--gold-bright);
+    text-shadow: 2px 2px 0 var(--gold-dim);
+    margin-bottom: 1.2rem;
+    animation: headerDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes headerDrop {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.score-card {
+    background: var(--card-bg);
+    border: 3px solid var(--gold);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 3rem;
+    min-width: 360px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 0 40px rgba(212, 168, 67, 0.15);
+}
+
+.score-text {
+    font-family: var(--font-display);
+    font-size: 4rem;
+    color: var(--gold-bright);
+    text-shadow: 2px 2px 0 var(--gold-dim);
+    opacity: 0;
+    transform: scale(0.4);
+    transition: opacity 0.6s ease-out, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-wrap: balance;
+    line-height: 1.2;
+}
+
+.score-visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* -----------------------------------------------------------------------
+   RESETTING Phase
+   ----------------------------------------------------------------------- */
+.resetting-card {
+    border-color: var(--gold-dim);
+}
+
+/* -----------------------------------------------------------------------
+   Debug Status
    ----------------------------------------------------------------------- */
 #debug-status {
     position: fixed;
-    bottom: 8px;
+    bottom: 6px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 0.7rem;
-    color: #555;
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.15);
     letter-spacing: 0.05em;
+    font-family: 'Courier New', monospace;
+    z-index: 10;
 }

@@ -3,7 +3,9 @@
 Wires the hardware abstraction layer to HTTP endpoints and WebSocket events:
 - MJPEG stream at /api/video_feed
 - Capture endpoint at POST /api/capture
+- Analyze endpoint at POST /api/analyze (OpenAI vision)
 - SocketIO phase state machine driven by button presses
+- Full phase loop: IDLE → CAPTURING → ANALYZING → CALCULATING → REVEALING → RESETTING → IDLE
 """
 
 import base64
@@ -12,11 +14,20 @@ import json
 import logging
 import os
 import time
+import threading
 
-from flask import Flask, Response, jsonify, send_from_directory
+from dotenv import load_dotenv
+from flask import Flask, Response, jsonify, request, send_from_directory
 from flask_socketio import SocketIO, emit
 
 from hardware import create_hardware
+from prompts import build_messages, parse_response, REFUSAL_FALLBACK
+from scores import generate_score
+
+# ---------------------------------------------------------------------------
+# Env
+# ---------------------------------------------------------------------------
+load_dotenv()
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -55,13 +66,16 @@ camera, button = create_hardware()
 current_phase: Phase = Phase.IDLE
 
 
-def _set_phase(new_phase: Phase) -> None:
+def _set_phase(new_phase: Phase, data: dict | None = None) -> None:
     """Transition to *new_phase*, log it, and emit a SocketIO event."""
     global current_phase
     old = current_phase
     current_phase = new_phase
     logger.info("[PHASE] %s -> %s", old.value, new_phase.value)
-    socketio.emit("phase_change", {"phase": new_phase.value})
+    payload = {"phase": new_phase.value}
+    if data:
+        payload["data"] = data
+    socketio.emit("phase_change", payload)
 
 
 def reset_to_idle() -> None:
@@ -69,6 +83,30 @@ def reset_to_idle() -> None:
     _set_phase(Phase.IDLE)
     button.unlock()
     logger.info("[PHASE] reset to IDLE — button unlocked")
+
+
+# ---------------------------------------------------------------------------
+# OpenAI client (lazy init)
+# ---------------------------------------------------------------------------
+_openai_client = None
+
+
+def _get_openai_client():
+    """Lazily initialize the OpenAI client."""
+    global _openai_client
+    if _openai_client is None:
+        try:
+            import openai
+            api_key = os.environ.get("OPENAI_API_KEY")
+            if not api_key:
+                logger.warning("[ANALYZE] OPENAI_API_KEY not set — analyze will always return fallback")
+                return None
+            _openai_client = openai.OpenAI(api_key=api_key)
+            logger.info("[ANALYZE] OpenAI client initialized")
+        except ImportError:
+            logger.warning("[ANALYZE] openai package not installed")
+            return None
+    return _openai_client
 
 
 # ---------------------------------------------------------------------------
@@ -83,6 +121,89 @@ def handle_button_press() -> None:
     button.lock()
     _set_phase(Phase.CAPTURING)
 
+    # Kick off the evaluation loop in a background thread
+    threading.Thread(target=_run_evaluation_loop, daemon=True).start()
+
+
+def _run_evaluation_loop() -> None:
+    """Run the full evaluation cycle in a background thread.
+
+    CAPTURING → ANALYZING → CALCULATING → REVEALING → RESETTING → IDLE
+    """
+    try:
+        # Brief pause in CAPTURING phase (let the frontend show "hold still")
+        time.sleep(1.0)
+
+        # --- CAPTURE ---
+        frame = camera.capture_frame()
+        image_b64 = base64.b64encode(frame).decode("utf-8")
+        logger.info("[CAPTURE] frame captured — %d bytes", len(frame))
+
+        # --- ANALYZE ---
+        _set_phase(Phase.ANALYZING)
+        demographics = _call_vision_api(image_b64)
+
+        # Photo is used and discarded — R018
+        del frame, image_b64
+
+        # Send demographics to frontend
+        _set_phase(Phase.ANALYZING, data={"demographics": demographics})
+
+        # Wait for frontend to finish the demographic reveal (~12s for 6 attributes at 2s each)
+        if demographics.get("refused"):
+            time.sleep(3.0)  # shorter pause for refusal message
+        else:
+            time.sleep(11.0)  # 5 attributes × ~2s + buffer
+
+        # --- CALCULATE ---
+        _set_phase(Phase.CALCULATING)
+        time.sleep(8.0)  # calculation theater runs ~5-10 seconds
+
+        # --- REVEAL ---
+        score = generate_score()
+        _set_phase(Phase.REVEALING, data={"score": score})
+        time.sleep(6.0)  # hold score on screen ~5 seconds
+
+        # --- RESET ---
+        _set_phase(Phase.RESETTING)
+        time.sleep(2.0)
+
+        # --- IDLE ---
+        reset_to_idle()
+
+    except Exception as exc:
+        logger.error("[LOOP] Evaluation loop failed: %s", exc, exc_info=True)
+        # Ensure we always return to idle
+        try:
+            reset_to_idle()
+        except Exception:
+            pass
+
+
+def _call_vision_api(image_b64: str) -> dict:
+    """Call OpenAI vision API. Returns demographics dict or fallback."""
+    client = _get_openai_client()
+    if client is None:
+        logger.info("[ANALYZE] No OpenAI client — returning fallback")
+        return dict(REFUSAL_FALLBACK)
+
+    try:
+        messages = build_messages(image_b64)
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            max_tokens=300,
+            temperature=0.7,
+        )
+        text = response.choices[0].message.content
+        logger.info("[ANALYZE] Raw response: %s", text[:300])
+        return parse_response(text)
+
+    except Exception as exc:
+        logger.error("[ANALYZE] API call failed: %s", exc)
+        # R016: network failure → skip demographics, still deliver a score
+        return dict(REFUSAL_FALLBACK)
+
 
 button.on_press(handle_button_press)
 
@@ -94,6 +215,12 @@ button.on_press(handle_button_press)
 def index():
     """Serve the frontend SPA."""
     return send_from_directory("static", "index.html")
+
+
+@app.route("/build-guide")
+def build_guide():
+    """Serve the build guide."""
+    return send_from_directory("static", "build-guide.html")
 
 
 def _generate_frames():
@@ -127,6 +254,22 @@ def capture():
     b64 = base64.b64encode(frame).decode("utf-8")
     logger.info("[CAPTURE] frame captured — %d bytes, base64 length %d", len(frame), len(b64))
     return jsonify({"image": b64, "phase": Phase.CAPTURING.value})
+
+
+@app.route("/api/analyze", methods=["POST"])
+def analyze():
+    """Analyze a captured image via OpenAI vision API.
+
+    Expects JSON body: {"image": "<base64-encoded JPEG>"}
+    Returns demographics JSON or fallback.
+    """
+    body = request.get_json(silent=True)
+    if not body or "image" not in body:
+        return jsonify({"error": "Missing 'image' field"}), 400
+
+    image_b64 = body["image"]
+    demographics = _call_vision_api(image_b64)
+    return jsonify(demographics)
 
 
 # ---------------------------------------------------------------------------

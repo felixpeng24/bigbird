@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Big Bird Is Watching You — Build Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --black: #111;
+    --dark: #1a1a1a;
+    --card: #222;
+    --border: #333;
+    --gold: #d4a843;
+    --gold-bright: #f0c95c;
+    --gold-dim: #a07e2e;
+    --cream: #f5ecd7;
+    --green: #5cb85c;
+    --red: #e03030;
+    --orange: #e67e22;
+    --blue: #3498db;
+    --text: #ddd;
+    --text-dim: #888;
+    --font: 'Fredoka', system-ui, -apple-system, sans-serif;
+    --mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- NAV ---- */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(17, 17, 17, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.6rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  nav::-webkit-scrollbar { display: none; }
+  nav .logo {
+    font-weight: 700;
+    color: var(--gold);
+    font-size: 1rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  nav a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: color 0.15s;
+  }
+  nav a:hover { color: var(--gold); }
+
+  /* ---- HERO ---- */
+  .hero {
+    padding: 6rem 2rem 3rem;
+    text-align: center;
+    background: linear-gradient(180deg, rgba(212,168,67,0.08) 0%, transparent 100%);
+  }
+  .hero h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--gold-bright);
+    margin-bottom: 0.5rem;
+  }
+  .hero p {
+    color: var(--text-dim);
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* ---- LAYOUT ---- */
+  .container {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 0 1.5rem 4rem;
+  }
+
+  /* ---- SECTIONS ---- */
+  .section {
+    margin-top: 3rem;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--border);
+  }
+  .section-number {
+    background: var(--gold);
+    color: var(--black);
+    font-weight: 700;
+    font-size: 0.9rem;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--cream);
+  }
+
+  /* ---- STEPS ---- */
+  .step {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+  .step-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    cursor: pointer;
+  }
+  .step-check {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    background: transparent;
+  }
+  .step-check.checked {
+    background: var(--green);
+    border-color: var(--green);
+  }
+  .step-check.checked::after {
+    content: '✓';
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .step h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--cream);
+    flex: 1;
+  }
+  .step.done h3 { color: var(--text-dim); text-decoration: line-through; }
+  .step-body {
+    margin-top: 0.75rem;
+    padding-left: 2.25rem;
+    color: var(--text);
+    font-size: 0.95rem;
+  }
+  .step-body p { margin-bottom: 0.6rem; }
+  .step-body ul { margin: 0.5rem 0 0.5rem 1.2rem; }
+  .step-body li { margin-bottom: 0.3rem; }
+
+  /* ---- CODE ---- */
+  pre {
+    background: #0d0d0d;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+    overflow-x: auto;
+    margin: 0.6rem 0;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #ccc;
+  }
+  code {
+    font-family: var(--mono);
+    font-size: 0.88em;
+    background: rgba(255,255,255,0.06);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+  }
+  pre code { background: none; padding: 0; }
+
+  /* ---- CALLOUTS ---- */
+  .callout {
+    border-radius: 10px;
+    padding: 0.9rem 1.1rem;
+    margin: 0.8rem 0;
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+  .callout-warn {
+    background: rgba(230, 126, 34, 0.1);
+    border: 1px solid rgba(230, 126, 34, 0.3);
+    color: var(--orange);
+  }
+  .callout-danger {
+    background: rgba(224, 48, 48, 0.1);
+    border: 1px solid rgba(224, 48, 48, 0.3);
+    color: var(--red);
+  }
+  .callout-info {
+    background: rgba(52, 152, 219, 0.1);
+    border: 1px solid rgba(52, 152, 219, 0.3);
+    color: var(--blue);
+  }
+  .callout-success {
+    background: rgba(92, 184, 92, 0.1);
+    border: 1px solid rgba(92, 184, 92, 0.3);
+    color: var(--green);
+  }
+  .callout strong { color: inherit; }
+
+  /* ---- WIRING DIAGRAM ---- */
+  .diagram {
+    background: #0d0d0d;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem;
+    margin: 1rem 0;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    line-height: 1.4;
+    overflow-x: auto;
+    white-space: pre;
+    color: #aaa;
+  }
+
+  /* ---- PARTS TABLE ---- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.8rem 0;
+    font-size: 0.88rem;
+  }
+  th {
+    text-align: left;
+    padding: 0.5rem 0.7rem;
+    border-bottom: 2px solid var(--border);
+    color: var(--gold);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  td {
+    padding: 0.45rem 0.7rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* ---- PROGRESS ---- */
+  .progress-bar-outer {
+    width: 100%;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    margin-top: 0.5rem;
+    overflow: hidden;
+  }
+  .progress-bar-inner {
+    height: 100%;
+    background: var(--green);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+  .progress-text {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 0.3rem;
+  }
+
+  /* ---- IMG ---- */
+  .img-note {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-top: 0.3rem;
+  }
+
+  /* ---- FOOTER ---- */
+  footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">🐦 Build Guide</span>
+  <a href="#prep">Prep</a>
+  <a href="#pi-setup">Pi Setup</a>
+  <a href="#cooler">Cooler</a>
+  <a href="#camera">Camera</a>
+  <a href="#display">Display</a>
+  <a href="#audio">Audio</a>
+  <a href="#button">Button</a>
+  <a href="#puppet">Puppet</a>
+  <a href="#software">Software</a>
+  <a href="#test">Final Test</a>
+</nav>
+
+<div class="hero">
+  <h1>🐦 Big Bird Build Guide</h1>
+  <p>Step-by-step hardware assembly and software installation for the "Big Bird Is Watching You" art installation.</p>
+  <div class="progress-bar-outer" style="max-width:400px;margin:1rem auto 0;">
+    <div class="progress-bar-inner" id="progress-bar"></div>
+  </div>
+  <div class="progress-text" id="progress-text">0 / 0 steps complete</div>
+</div>
+
+<div class="container">
+
+<!-- ============================================================ -->
+<!-- SECTION 0: PREPARATION -->
+<!-- ============================================================ -->
+<div class="section" id="prep">
+  <div class="section-header">
+    <div class="section-number">0</div>
+    <h2>Preparation & Parts Check</h2>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Lay out all 16 components and verify nothing is missing</h3>
+    </div>
+    <div class="step-body">
+      <p>Clear a large table and unbox everything. Check each item against this list:</p>
+      <table>
+        <tr><th>#</th><th>Component</th><th>Got it?</th></tr>
+        <tr><td>1</td><td>Raspberry Pi 5 (4GB or 8GB)</td><td>☐</td></tr>
+        <tr><td>2</td><td>Raspberry Pi 27W USB-C Power Supply</td><td>☐</td></tr>
+        <tr><td>3</td><td>Raspberry Pi Camera Module 3</td><td>☐</td></tr>
+        <tr><td>4</td><td>iUniker ICE Peak Active Cooler</td><td>☐</td></tr>
+        <tr><td>5</td><td>GeeekPi 7" IPS Display (1024×600)</td><td>☐</td></tr>
+        <tr><td>6</td><td>Cable Matters Micro HDMI → HDMI cable</td><td>☐</td></tr>
+        <tr><td>7</td><td>EG STARTS 100mm Arcade Button (red)</td><td>☐</td></tr>
+        <tr><td>8</td><td>I-VOM / Milcraft Mini Speaker</td><td>☐</td></tr>
+        <tr><td>9</td><td>Plugable USB Audio Adapter</td><td>☐</td></tr>
+        <tr><td>10</td><td>Tan QY 3.5mm Male-to-Female Extension Cable</td><td>☐</td></tr>
+        <tr><td>11</td><td>CableCreation 6" Micro USB Cable (speaker charging)</td><td>☐</td></tr>
+        <tr><td>12</td><td>Waveshare 22-pin to 15-pin CSI FPC Cable (200mm)</td><td>☐</td></tr>
+        <tr><td>13</td><td>AuviPal 90° USB-C Adapter</td><td>☐</td></tr>
+        <tr><td>14</td><td>Elegoo Dupont Jumper Wires (120 pack)</td><td>☐</td></tr>
+        <tr><td>15</td><td>Yintar Surge Protector Power Strip</td><td>☐</td></tr>
+        <tr><td>16</td><td>Jay Franco Big Bird Plush</td><td>☐</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Gather tools you'll need</h3>
+    </div>
+    <div class="step-body">
+      <ul>
+        <li><strong>Soldering iron + solder</strong> — for wiring the arcade button microswitch</li>
+        <li><strong>Wire strippers / wire cutters</strong></li>
+        <li><strong>Small Phillips screwdriver</strong> — for mounting the cooler to the Pi</li>
+        <li><strong>Scissors or seam ripper</strong> — for opening the Big Bird plush</li>
+        <li><strong>Needle and thread or hot glue gun</strong> — for closing the plush after assembly</li>
+        <li><strong>Drill + 88mm hole saw</strong> (or craft knife) — for the button mounting surface</li>
+        <li><strong>microSD card</strong> (32GB+) — for Raspberry Pi OS</li>
+        <li><strong>USB keyboard + mouse</strong> — for initial Pi setup (can borrow temporarily)</li>
+        <li><strong>Your laptop</strong> — for flashing the SD card</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 1: PI SETUP -->
+<!-- ============================================================ -->
+<div class="section" id="pi-setup">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <h2>Raspberry Pi 5 Base Setup</h2>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Flash Raspberry Pi OS to the microSD card</h3>
+    </div>
+    <div class="step-body">
+      <p>On your Mac, download and run the <strong>Raspberry Pi Imager</strong>:</p>
+      <ol>
+        <li>Download from <a href="https://www.raspberrypi.com/software/" style="color:var(--gold)">raspberrypi.com/software</a></li>
+        <li>Insert your microSD card into your Mac (use an adapter if needed)</li>
+        <li>Open Raspberry Pi Imager</li>
+        <li>Click <strong>Choose Device</strong> → select <strong>Raspberry Pi 5</strong></li>
+        <li>Click <strong>Choose OS</strong> → select <strong>Raspberry Pi OS (64-bit)</strong> (the full desktop version, not Lite)</li>
+        <li>Click <strong>Choose Storage</strong> → select your microSD card</li>
+        <li>Click <strong>Next</strong>, then <strong>Edit Settings</strong></li>
+      </ol>
+      <p>In the settings dialog, configure:</p>
+      <ul>
+        <li><strong>Hostname:</strong> <code>bigbird</code></li>
+        <li><strong>Username:</strong> <code>pi</code></li>
+        <li><strong>Password:</strong> something you'll remember</li>
+        <li><strong>WiFi:</strong> enter your WiFi network name and password</li>
+        <li><strong>Locale:</strong> set your timezone and keyboard layout</li>
+        <li>Under <strong>Services</strong> tab: enable SSH (password authentication)</li>
+      </ul>
+      <p>Click <strong>Save</strong>, then <strong>Yes</strong> to flash. Wait for it to finish (~5 min).</p>
+      <div class="callout callout-info">
+        <strong>Why SSH?</strong> Once the Pi is inside the puppet, you'll want to access it remotely from your Mac. SSH lets you do that.
+      </div>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Insert the SD card and do a bare-board boot test</h3>
+    </div>
+    <div class="step-body">
+      <p>Before attaching anything else, verify the Pi boots:</p>
+      <ol>
+        <li>Insert the microSD card into the Pi 5's card slot (on the bottom of the board)</li>
+        <li>Connect the <strong>Cable Matters Micro HDMI cable</strong> from the Pi's <strong>HDMI 0</strong> port (the one closest to the USB-C power port) to any monitor or TV you have</li>
+        <li>Connect a USB keyboard and mouse to the Pi's USB ports</li>
+        <li>Connect the <strong>27W USB-C power supply</strong> to the Pi's USB-C port</li>
+        <li>The Pi should boot to the Raspberry Pi OS desktop within 30-60 seconds</li>
+      </ol>
+      <div class="callout callout-warn">
+        <strong>Don't use the GeeekPi display yet.</strong> Use any regular monitor/TV for this initial setup. We'll configure the 7" display resolution later.
+      </div>
+      <p>Once you see the desktop, open a terminal and run:</p>
+<pre><code>sudo apt update && sudo apt upgrade -y</code></pre>
+      <p>This ensures you have the latest system packages. Takes ~5-10 minutes.</p>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Verify WiFi and SSH work</h3>
+    </div>
+    <div class="step-body">
+      <p>On the Pi terminal, check your IP address:</p>
+<pre><code>hostname -I</code></pre>
+      <p>You should see something like <code>192.168.1.42</code>. Write this down.</p>
+      <p>Now from <strong>your Mac</strong>, open Terminal and SSH in:</p>
+<pre><code>ssh pi@bigbird.local</code></pre>
+      <p>If <code>.local</code> doesn't resolve, use the IP address directly:</p>
+<pre><code>ssh pi@192.168.1.42</code></pre>
+      <p>Accept the fingerprint prompt, enter your password. You should see a Pi terminal prompt.</p>
+      <div class="callout callout-success">
+        <strong>✓ Checkpoint:</strong> Pi boots, desktop loads, WiFi connected, SSH works from your Mac. You can now shut down the Pi (<code>sudo shutdown now</code>) and move to hardware assembly.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 2: ACTIVE COOLER -->
+<!-- ============================================================ -->
+<div class="section" id="cooler">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <h2>Mount the Active Cooler</h2>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Attach the iUniker ICE Peak cooler to the Pi 5</h3>
+    </div>
+    <div class="step-body">
+      <div class="callout callout-danger">
+        <strong>⚡ Make sure the Pi is unplugged and powered off before touching the board.</strong>
+      </div>
+      <ol>
+        <li><strong>Peel the release paper</strong> from the thermal pad on the bottom of the cooler (the side that touches the CPU chip)</li>
+        <li><strong>Align the cooler</strong> over the Pi 5's CPU (the large silver square chip in the center of the board). The screw holes on the cooler should line up with the two mounting holes on the Pi board.</li>
+        <li><strong>Press down gently</strong> so the thermal pad makes full contact with the CPU</li>
+        <li><strong>Screw in both mounting screws</strong> (included with the cooler) using a small Phillips screwdriver. Tighten snugly — don't overtighten.</li>
+        <li><strong>Connect the fan cable</strong> to the Pi 5's 4-pin JST fan header. This is the small white connector on the upper-right area of the board, between the GPIO pins and the USB 2.0 ports. The cable only fits one way.</li>
+      </ol>
+      <div class="callout callout-info">
+        <strong>Why this matters:</strong> The Pi 5 inside a sealed plush puppet will overheat without active cooling. This cooler keeps the CPU under 56°C even under stress. The fan auto-adjusts speed via PWM — you won't need to configure anything.
+      </div>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Test the cooler works</h3>
+    </div>
+    <div class="step-body">
+      <p>Power on the Pi. You should hear (or feel) the fan spin briefly on boot.</p>
+      <p>Open a terminal and check the temperature:</p>
+<pre><code>vcgencmd measure_temp</code></pre>
+      <p>Should show something like <code>temp=38.5'C</code>. Anything under 55°C at idle is great.</p>
+      <p>Verify no throttling:</p>
+<pre><code>vcgencmd get_throttled</code></pre>
+      <p>Should show <code>throttled=0x0</code> (no throttling).</p>
+      <div class="callout callout-success">
+        <strong>✓ Checkpoint:</strong> Cooler mounted, fan spins, temperature under control.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 3: CAMERA -->
+<!-- ============================================================ -->
+<div class="section" id="camera">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <h2>Connect the Camera</h2>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Connect the Waveshare CSI cable to the Pi 5</h3>
+    </div>
+    <div class="step-body">
+      <div class="callout callout-danger">
+        <strong>⚡ Power off the Pi before connecting ribbon cables.</strong> The CSI connector is fragile.
+      </div>
+      <p>The Pi 5 has two CSI/DSI connectors (22-pin, labeled CAM/DISP 0 and CAM/DISP 1). Use <strong>CAM/DISP 0</strong> (the one closer to the HDMI ports).</p>
+      <ol>
+        <li><strong>Gently lift the black plastic latch</strong> on the CAM/DISP 0 connector by pulling it straight up. It hinges open about 90°. Don't force it.</li>
+        <li><strong>Slide the 22-pin end</strong> of the Waveshare cable into the connector. The metal contacts face the board (toward the Pi's PCB). The blue reinforcement strip faces up.</li>
+        <li><strong>Push the latch back down</strong> to lock the cable. Give the cable a very gentle tug — it should not slide out.</li>
+      </ol>
+      <div class="callout callout-warn">
+        <strong>Orientation matters.</strong> If the cable is in backwards, the camera won't be detected. Metal contacts face the board.
+      </div>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Connect the other end to the Camera Module 3</h3>
+    </div>
+    <div class="step-body">
+      <ol>
+        <li>The Camera Module 3 has a 15-pin connector. Lift its latch the same way.</li>
+        <li>Slide the <strong>15-pin end</strong> of the Waveshare cable in. Metal contacts face the camera's PCB.</li>
+        <li>Push the latch down to lock.</li>
+      </ol>
+      <p>The cable is 200mm (about 8 inches) — enough to route from the Pi inside the puppet body up to the eye area.</p>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Test the camera</h3>
+    </div>
+    <div class="step-body">
+      <p>Power on the Pi and open a terminal:</p>
+<pre><code># Quick test — shows camera preview for 5 seconds
+libcamera-hello -t 5000
+
+# Capture a test photo
+libcamera-still -o test.jpg
+
+# Check the file
+ls -la test.jpg</code></pre>
+      <p>You should see a camera preview window pop up, then a JPEG file saved. If you get an error like "no cameras available", double-check the ribbon cable orientation and that both latches are fully closed.</p>
+      <div class="callout callout-success">
+        <strong>✓ Checkpoint:</strong> Camera detected, preview works, photo captured.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 4: DISPLAY -->
+<!-- ============================================================ -->
+<div class="section" id="display">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <h2>Set Up the 7" Display</h2>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Connect the GeeekPi display</h3>
+    </div>
+    <div class="step-body">
+      <ol>
+        <li>Connect the <strong>Cable Matters Micro HDMI cable</strong> from the Pi's <strong>HDMI 0</strong> port to the display's full-size HDMI port</li>
+        <li>Power the display via its <strong>USB-C port</strong>. You can use:
+          <ul>
+            <li>One of the Pi's USB-A ports (with a USB-A to USB-C cable, often included with the display), OR</li>
+            <li>A USB-A port on the power strip</li>
+          </ul>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Configure the 1024×600 resolution</h3>
+    </div>
+    <div class="step-body">
+      <p>The 7" display uses a non-standard resolution. Edit the boot config:</p>
+<pre><code>sudo nano /boot/firmware/config.txt</code></pre>
+      <p>Add these lines at the bottom of the file:</p>
+<pre><code># GeeekPi 7" 1024x600 display
+hdmi_force_hotplug=1
+hdmi_group=2
+hdmi_mode=87
+hdmi_cvt 1024 600 60 3 0 0 0</code></pre>
+      <p>Save (<code>Ctrl+O</code>, <code>Enter</code>, <code>Ctrl+X</code>) and reboot:</p>
+<pre><code>sudo reboot</code></pre>
+      <p>After reboot, the display should show the full 1024×600 desktop with no black bars or stretching.</p>
+      <div class="callout callout-success">
+        <strong>✓ Checkpoint:</strong> Display shows the Pi desktop at 1024×600, no distortion.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 5: AUDIO -->
+<!-- ============================================================ -->
+<div class="section" id="audio">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <h2>Set Up Audio</h2>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Connect the audio chain</h3>
+    </div>
+    <div class="step-body">
+      <p>The Pi 5 has no 3.5mm headphone jack, so the audio chain is:</p>
+      <div class="diagram">Pi USB-A port
+    │
+    ▼
+Plugable USB Audio Adapter (green 3.5mm female jack)
+    │
+    ▼
+Tan QY extension cable (male end plugs into adapter)
+    │
+    ▼ (female end)
+Speaker's built-in retractable male plug inserts here</div>
+      <ol>
+        <li>Plug the <strong>Plugable USB Audio Adapter</strong> into any of the Pi's USB-A ports</li>
+        <li>Plug the <strong>male end</strong> of the Tan QY extension cable into the adapter's <strong>green</strong> 3.5mm jack (not the red mic jack)</li>
+        <li>Pull out the speaker's <strong>built-in retractable 3.5mm male plug</strong> from its base</li>
+        <li>Insert the speaker's male plug into the <strong>female end</strong> of the extension cable</li>
+        <li>Turn on the speaker (power button)</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Connect speaker charging</h3>
+    </div>
+    <div class="step-body">
+      <p>The speaker runs on battery but needs continuous charging for multi-hour operation:</p>
+      <ol>
+        <li>Plug the <strong>USB-A end</strong> of the CableCreation 6" Micro USB cable into a <strong>USB-A port on the power strip</strong></li>
+        <li>Plug the <strong>Micro USB end</strong> into the speaker's charging port</li>
+      </ol>
+      <p>The speaker can play audio over aux while charging simultaneously — they're separate ports.</p>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Set USB audio as the default output and test</h3>
+    </div>
+    <div class="step-body">
+      <p>On the Pi, check that the USB adapter was detected:</p>
+<pre><code>aplay -l</code></pre>
+      <p>You should see a "USB Audio Device" listed (usually as card 1 or 2). Then set it as default output:</p>
+<pre><code># List available sinks
+pactl list short sinks
+
+# Set USB audio as default (use the name from the list above)
+pactl set-default-sink alsa_output.usb-GeneralPlus_USB_Audio_Device-00.analog-stereo
+
+# Set volume to 80%
+pactl set-sink-volume @DEFAULT_SINK@ 80%
+
+# Test with a sound
+aplay /usr/share/sounds/alsa/Front_Center.wav</code></pre>
+      <p>You should hear "Front Center" through the speaker.</p>
+      <div class="callout callout-warn">
+        <strong>The speaker has no volume buttons.</strong> All volume is controlled from the Pi via software. Set it to 70-80% as a starting point — you can adjust at the venue.
+      </div>
+      <div class="callout callout-success">
+        <strong>✓ Checkpoint:</strong> USB audio adapter detected, sound plays through the speaker.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 6: BUTTON -->
+<!-- ============================================================ -->
+<div class="section" id="button">
+  <div class="section-header">
+    <div class="section-number">6</div>
+    <h2>Wire the Arcade Button</h2>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Identify the microswitch terminals</h3>
+    </div>
+    <div class="step-body">
+      <p>The 100mm arcade button comes with a separate microswitch that snaps into the button housing. The microswitch has three terminals — you only need two:</p>
+      <ul>
+        <li><strong>COM</strong> (Common) — usually the middle terminal</li>
+        <li><strong>NO</strong> (Normally Open) — the terminal that connects to COM when the button is pressed</li>
+        <li><strong>NC</strong> (Normally Closed) — <em>not used</em></li>
+      </ul>
+      <p>The terminals are usually labeled on the microswitch body. If not, use a multimeter on continuity mode: press the button and find which two terminals connect.</p>
+      <div class="callout callout-warn">
+        <strong>Ignore the LED terminals.</strong> The button also has 12V LED terminals (larger 6.3mm spade connectors). Leave these completely unwired — we're not using the LED.
+      </div>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Solder wires to the microswitch</h3>
+    </div>
+    <div class="step-body">
+      <div class="callout callout-danger">
+        <strong>🔥 Soldering safety:</strong> Work in a ventilated area. The iron tip is 300°C+. Don't touch the tip or freshly soldered joints.
+      </div>
+      <ol>
+        <li>Cut two pieces of hookup wire, about <strong>12-16 inches</strong> (30-40cm) each — long enough to route from inside the puppet to the Pi</li>
+        <li>Strip about 5mm of insulation from each end of both wires</li>
+        <li><strong>Solder one wire to the NO terminal</strong> of the microswitch</li>
+        <li><strong>Solder the other wire to the COM terminal</strong></li>
+        <li>Give each joint a gentle tug to make sure it's solid</li>
+      </ol>
+      <p>On the other end of each wire, attach a <strong>female Dupont connector</strong> from the Elegoo jumper wire pack. The easiest method: cut a female-to-female jumper wire in half and solder/twist-connect it to your button wire.</p>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Connect to the Pi's GPIO pins</h3>
+    </div>
+    <div class="step-body">
+      <p>Push the female Dupont connectors onto the Pi's GPIO header:</p>
+      <div class="diagram">                    Pi 5 GPIO Header (top view)
+                    ┌─────────────────────────────┐
+                    │  (pin 1) 3V3    5V (pin 2)  │
+                    │  (pin 3) SDA    5V (pin 4)  │
+                    │  (pin 5) SCL    GND (pin 6) │
+                    │  (pin 7) GP4    TX (pin 8)  │
+              ┌───▶ │  (pin 9) GND    RX (pin 10) │
+              │     │ (pin 11) GP17   GP18 (pin 12)│ ◀───┐
+              │     │ (pin 13) GP27   GND (pin 14) │     │
+              │     │  ...                     ... │     │
+              │     └─────────────────────────────┘     │
+              │                                          │
+         COM wire                                   NO wire
+       (from microswitch)                      (from microswitch)</div>
+      <ul>
+        <li><strong>NO wire</strong> → <strong>GPIO 17</strong> (physical pin 11)</li>
+        <li><strong>COM wire</strong> → <strong>GND</strong> (physical pin 9)</li>
+      </ul>
+      <div class="callout callout-info">
+        <strong>How it works:</strong> GPIO 17 has an internal pull-up resistor (enabled by gpiozero). It normally reads HIGH (3.3V). When you press the button, the microswitch shorts NO to COM, pulling GPIO 17 to GND (LOW). The software detects this falling edge as a button press.
+      </div>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Test the button</h3>
+    </div>
+    <div class="step-body">
+      <p>On the Pi, run a quick test:</p>
+<pre><code>python3 -c "
+from gpiozero import Button
+from signal import pause
+
+btn = Button(17)
+btn.when_pressed = lambda: print('PRESSED!')
+btn.when_released = lambda: print('released')
+print('Press the arcade button...')
+pause()
+"</code></pre>
+      <p>Press the big red button. You should see <code>PRESSED!</code> in the terminal. Press Ctrl+C to exit.</p>
+      <div class="callout callout-success">
+        <strong>✓ Checkpoint:</strong> Button press detected on GPIO 17. The physical input works.
+      </div>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Mount the button (optional — can do at venue)</h3>
+    </div>
+    <div class="step-body">
+      <p>The 100mm button needs an 88mm mounting hole in a flat surface. Options:</p>
+      <ul>
+        <li><strong>Wooden craft box</strong> — drill an 88mm hole in the lid with a hole saw</li>
+        <li><strong>Thick MDF/plywood</strong> — cut a circle with a jigsaw or hole saw</li>
+        <li><strong>Plastic project box</strong> — cut with a craft knife (harder with plastic)</li>
+      </ul>
+      <p>Insert the button from the top, thread the locking ring from below, and tighten by hand. The wires route out the back/bottom to the Pi.</p>
+      <p>You can also skip mounting for now and just hold the button during testing — mount it at the venue.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 7: PUPPET ASSEMBLY -->
+<!-- ============================================================ -->
+<div class="section" id="puppet">
+  <div class="section-header">
+    <div class="section-number">7</div>
+    <h2>Puppet Assembly</h2>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Open the plush and create the electronics cavity</h3>
+    </div>
+    <div class="step-body">
+      <div class="callout callout-warn">
+        <strong>This is irreversible.</strong> Once you cut the plush open, you're committed. Plan your cuts before starting.
+      </div>
+      <p>The Jay Franco Big Bird plush is sealed (no zipper). You need to cut open a seam:</p>
+      <ol>
+        <li><strong>Find the back seam</strong> — look for a stitched line along the puppet's back, from the neck area down to the lower body</li>
+        <li><strong>Use a seam ripper or small scissors</strong> to open about 8-10 inches of the back seam. This is your access point for all electronics.</li>
+        <li><strong>Remove or displace weighted beads</strong> — the plush contains weighted beads. Push them to the extremities (arms, legs, head) or partially remove them to create a cavity in the torso for the Pi + cooler stack, speaker, and cable routing.</li>
+        <li>You need roughly <strong>170 × 130 × 80 mm</strong> of clear space for the Pi + cooler + adapter + cables</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Position the camera in the eye area</h3>
+    </div>
+    <div class="step-body">
+      <ol>
+        <li>The Camera Module 3 (25 × 24mm) is tiny. Find a spot at or near one of Big Bird's eyes.</li>
+        <li><strong>Cut a small hole</strong> in the fabric just large enough for the camera lens (about 10mm diameter)</li>
+        <li>Position the camera behind the hole so the lens looks outward</li>
+        <li>Secure with hot glue or a small stitch around the camera board (don't cover the lens)</li>
+        <li>Route the CSI ribbon cable down through the puppet body to the Pi</li>
+      </ol>
+      <div class="callout callout-info">
+        <strong>Camera in Big Bird's eye</strong> — this is the surveillance metaphor made literal. Participants look at Big Bird, and Big Bird looks back.
+      </div>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Position the speaker near the mouth area</h3>
+    </div>
+    <div class="step-body">
+      <p>The speaker (~50 × 50 × 50mm) should go near Big Bird's beak/throat area so the sound appears to come from the puppet:</p>
+      <ol>
+        <li>Nestle the speaker in the upper chest area, driver (mesh side) facing outward</li>
+        <li>Route the 3.5mm retractable cable and micro USB charging cable down to the body cavity</li>
+        <li>Make sure the fabric isn't pressing too tightly against the speaker cone — it needs a little air space to project sound</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Install the Pi and route all cables</h3>
+    </div>
+    <div class="step-body">
+      <p>Place the Pi 5 (with cooler mounted) in the torso cavity. Connect everything:</p>
+      <ul>
+        <li><strong>CSI cable</strong> from camera → Pi CAM/DISP 0</li>
+        <li><strong>USB audio adapter</strong> → Pi USB-A port → extension cable → speaker aux plug</li>
+        <li><strong>HDMI cable</strong> routes out to the display (mounted externally on the belly or a stand)</li>
+        <li><strong>Button wires</strong> route out to wherever the button is mounted</li>
+        <li><strong>Power cable</strong> routes out to the 27W PSU (use the AuviPal 90° adapter for a cleaner bend)</li>
+        <li><strong>Speaker Micro USB</strong> routes out to the power strip</li>
+      </ul>
+      <div class="callout callout-danger">
+        <strong>🌡️ CRITICAL: Cut a vent hole.</strong> The active cooler needs airflow. Cut or leave a small opening (2-3cm) in the puppet fabric near the cooler's exhaust side. Without this, hot air recirculates inside the insulated plush and the Pi will throttle.
+      </div>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Mount the display</h3>
+    </div>
+    <div class="step-body">
+      <p>The 7" display (~165 × 100mm) mounts externally. Options:</p>
+      <ul>
+        <li><strong>Belly mount:</strong> Cut a rectangular window in Big Bird's belly, mount the display behind it (face out). Secure with hot glue or velcro.</li>
+        <li><strong>Stand mount:</strong> Use the included display stands and position it next to the puppet on a table.</li>
+        <li><strong>Neck/chest mount:</strong> Hang it from Big Bird's chest like a placard.</li>
+      </ul>
+      <p>The HDMI and power cables route from the display into the puppet body and connect to the Pi.</p>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Close up the puppet</h3>
+    </div>
+    <div class="step-body">
+      <p>Once everything is positioned and cables are routed cleanly:</p>
+      <ol>
+        <li>Use a <strong>needle and thread</strong> to loosely stitch the back seam closed — use big stitches so you can reopen if needed</li>
+        <li>Alternatively, use <strong>hot glue</strong> along the seam edges (less reversible) or <strong>velcro strips</strong> (most reversible)</li>
+        <li>Leave the vent hole open for the cooler</li>
+        <li>Make sure no cables are kinked, pinched, or under tension</li>
+      </ol>
+      <div class="callout callout-success">
+        <strong>✓ Checkpoint:</strong> All hardware is physically installed. Pi, camera, speaker, and display are connected. Cables route cleanly. Vent hole is open.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 8: SOFTWARE INSTALLATION -->
+<!-- ============================================================ -->
+<div class="section" id="software">
+  <div class="section-header">
+    <div class="section-number">8</div>
+    <h2>Software Installation</h2>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Clone the repository onto the Pi</h3>
+    </div>
+    <div class="step-body">
+      <p>SSH into the Pi from your Mac (or use the Pi's terminal directly):</p>
+<pre><code>ssh pi@bigbird.local</code></pre>
+      <p>Clone the project:</p>
+<pre><code>cd ~
+git clone https://github.com/YOUR_USERNAME/bigbird.git
+cd bigbird</code></pre>
+      <p>(Replace with your actual repo URL, or copy the files over via <code>scp</code>.)</p>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Create the .env file with your OpenAI API key</h3>
+    </div>
+    <div class="step-body">
+<pre><code>nano ~/bigbird/.env</code></pre>
+      <p>Add this single line:</p>
+<pre><code>OPENAI_API_KEY=sk-your-actual-key-here</code></pre>
+      <p>Save and exit (<code>Ctrl+O</code>, <code>Enter</code>, <code>Ctrl+X</code>).</p>
+      <div class="callout callout-danger">
+        <strong>Do not commit the .env file to git.</strong> It contains your API key.
+      </div>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Run the automated installer</h3>
+    </div>
+    <div class="step-body">
+      <p>The install script handles system packages, Python dependencies, and systemd service setup:</p>
+<pre><code>cd ~/bigbird
+chmod +x install-pi.sh
+./install-pi.sh</code></pre>
+      <p>This takes about 2-5 minutes. It will:</p>
+      <ul>
+        <li>Install <code>chromium-browser</code>, <code>unclutter</code>, <code>python3-picamera2</code></li>
+        <li>Install Python packages from <code>requirements.txt</code> (Flask, Flask-SocketIO, openai, etc.)</li>
+        <li>Copy <code>bigbird.service</code> to systemd and enable auto-start on boot</li>
+      </ul>
+      <p>When it finishes, you should see: <code>[SETUP] ✓ Installation complete!</code></p>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Do a manual test run before enabling kiosk mode</h3>
+    </div>
+    <div class="step-body">
+      <p>Before committing to auto-boot, test everything manually:</p>
+<pre><code>cd ~/bigbird
+python server.py</code></pre>
+      <p>Open Chromium on the Pi's desktop and navigate to <code>http://localhost:8080</code>.</p>
+      <p>You should see:</p>
+      <ul>
+        <li>The idle screen with the clay swirl background</li>
+        <li><strong>Live camera feed</strong> from the Camera Module 3 (your actual face, not a test image!)</li>
+        <li>"BIG BIRD IS WATCHING YOU" title in Comic Sans</li>
+      </ul>
+      <p>Now press the <strong>big red arcade button</strong> (or spacebar on a connected keyboard). The full evaluation loop should run:</p>
+      <ol>
+        <li><strong>CAPTURING</strong> — "Hold still" with camera flash</li>
+        <li><strong>ANALYZING</strong> — demographics appear one by one (from OpenAI)</li>
+        <li><strong>CALCULATING</strong> — green jargon lines scroll with progress bar</li>
+        <li><strong>REVEALING</strong> — Leadership Index score appears</li>
+        <li><strong>RESETTING</strong> — returns to idle</li>
+      </ol>
+      <p>Listen for TTS through the speaker. You should hear Big Bird's robotic espeak voice narrating each phase.</p>
+      <div class="callout callout-warn">
+        <strong>If TTS is silent:</strong> Check that the USB audio adapter is set as default output and volume is up. Run <code>pactl set-sink-volume @DEFAULT_SINK@ 80%</code>.
+      </div>
+      <p>Press <code>Ctrl+C</code> in the terminal to stop the server when done.</p>
+      <div class="callout callout-success">
+        <strong>✓ Checkpoint:</strong> Full loop works on Pi with real camera, real button, real speaker, real OpenAI API.
+      </div>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Reboot and verify auto-start kiosk mode</h3>
+    </div>
+    <div class="step-body">
+      <p>This is the moment of truth:</p>
+<pre><code>sudo reboot</code></pre>
+      <p>After reboot (~30-45 seconds), the following should happen automatically with no keyboard or mouse interaction:</p>
+      <ol>
+        <li>Pi boots into the desktop</li>
+        <li>The <code>bigbird.service</code> starts the Flask server</li>
+        <li>Chromium opens in <strong>full-screen kiosk mode</strong> — no browser chrome, no address bar, no close button</li>
+        <li>The cursor is hidden (via unclutter)</li>
+        <li>The idle screen appears with the live camera feed</li>
+      </ol>
+      <p>Press the arcade button. The full loop should run. If it does — you're done.</p>
+      <div class="callout callout-info">
+        <strong>To get out of kiosk mode</strong> (for debugging): SSH in from your Mac and run <code>sudo systemctl stop bigbird</code>. Or connect a keyboard and press <code>Alt+F4</code> to close Chromium.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 9: FINAL CHECKS -->
+<!-- ============================================================ -->
+<div class="section" id="test">
+  <div class="section-header">
+    <div class="section-number">9</div>
+    <h2>Final Checks & Venue Prep</h2>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Power cycle test — unplug and replug</h3>
+    </div>
+    <div class="step-body">
+      <p>Simulate a power outage by unplugging the power strip entirely. Wait 10 seconds. Plug it back in.</p>
+      <p>The Pi should boot, the server should start, Chromium should open in kiosk mode, and the idle screen should appear — all automatically. No intervention needed.</p>
+      <p>This is critical because the installation may lose power at the venue and needs to recover on its own.</p>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Run the soak test (1+ hour)</h3>
+    </div>
+    <div class="step-body">
+      <p>Let the installation run for at least 1 hour. Trigger an evaluation every 5-10 minutes. Monitor for:</p>
+      <ul>
+        <li><strong>Memory leaks</strong> — does the app get slower over time?</li>
+        <li><strong>Temperature</strong> — SSH in and run <code>vcgencmd measure_temp</code> periodically. Should stay under 65°C.</li>
+        <li><strong>Camera freezing</strong> — does the MJPEG stream keep working after many cycles?</li>
+        <li><strong>Audio glitches</strong> — does TTS continue working after many cycles?</li>
+        <li><strong>Phase resets cleanly</strong> — does it always return to idle correctly?</li>
+      </ul>
+      <p>Monitor from your Mac via SSH:</p>
+<pre><code># Watch temperature
+ssh pi@bigbird.local 'watch -n 5 vcgencmd measure_temp'
+
+# Watch server logs
+ssh pi@bigbird.local 'journalctl -u bigbird -f'</code></pre>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Readability test — check text size from 3-5 feet</h3>
+    </div>
+    <div class="step-body">
+      <p>Stand 3-5 feet from the 7" display and verify:</p>
+      <ul>
+        <li>The title "BIG BIRD IS WATCHING YOU" is clearly readable</li>
+        <li>Demographic labels and values are readable during the analysis phase</li>
+        <li>The Leadership Index score is the <strong>largest and most readable</strong> element</li>
+        <li>The jargon text during calculation is readable (it's smaller, which is fine — it's flavor text)</li>
+      </ul>
+      <div class="callout callout-warn">
+        <strong>If text is too small:</strong> SSH in and edit <code>~/bigbird/static/style.css</code>. Bump up font sizes. The score (<code>.score-text</code>) should be at least <code>4rem</code>. The title should be at least <code>3.5rem</code>.
+      </div>
+    </div>
+  </div>
+
+  <div class="step" data-step>
+    <div class="step-header">
+      <div class="step-check" onclick="toggleStep(this)"></div>
+      <h3>Venue day checklist</h3>
+    </div>
+    <div class="step-body">
+      <p>Bring to the venue:</p>
+      <ul>
+        <li>☐ Big Bird puppet (with all electronics inside)</li>
+        <li>☐ 7" display (with HDMI cable connected)</li>
+        <li>☐ Arcade button (mounted or loose)</li>
+        <li>☐ Power strip + 27W PSU</li>
+        <li>☐ Speaker charging cable (Micro USB)</li>
+        <li>☐ Your laptop (in case you need to SSH in for debugging)</li>
+      </ul>
+      <p>At the venue:</p>
+      <ol>
+        <li>Find an outlet. Plug in the power strip.</li>
+        <li>Plug the 27W PSU into an AC outlet on the strip.</li>
+        <li>Plug the speaker charging cable into a USB-A port on the strip.</li>
+        <li>Position the puppet, display, and button on the table.</li>
+        <li>Turn on the power strip.</li>
+        <li>Wait ~45 seconds for boot.</li>
+        <li>Verify the idle screen appears with live camera.</li>
+        <li>Do one test press of the button to confirm the full loop works.</li>
+        <li>Walk away. Big Bird takes it from here.</li>
+      </ol>
+      <div class="callout callout-success" style="font-size:1.05rem;text-align:center;padding:1.2rem;">
+        <strong>🐦 You're done. Big Bird is watching.</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TROUBLESHOOTING -->
+<!-- ============================================================ -->
+<div class="section" id="troubleshooting">
+  <div class="section-header">
+    <div class="section-number">?</div>
+    <h2>Troubleshooting</h2>
+  </div>
+
+  <div class="step">
+    <div class="step-body" style="padding-left:0;">
+      <table>
+        <tr><th>Problem</th><th>Fix</th></tr>
+        <tr><td>Display is black / no signal</td><td>Check HDMI cable is in <strong>HDMI 0</strong> (closest to USB-C). Verify <code>config.txt</code> changes. Try without the <code>hdmi_cvt</code> line first.</td></tr>
+        <tr><td>Camera not detected</td><td>Ribbon cable orientation — metal contacts face the board. Make sure both latches are fully closed. Run <code>libcamera-hello</code>.</td></tr>
+        <tr><td>No sound from speaker</td><td>Check <code>pactl list short sinks</code> and set USB audio as default. Make sure the extension cable is in the <strong>green</strong> jack (not red mic jack). Verify speaker is turned on.</td></tr>
+        <tr><td>Button press not detected</td><td>Check GPIO 17 (pin 11) and GND (pin 9) connections. Run the test script. Verify solder joints are solid.</td></tr>
+        <tr><td>Pi overheating / throttling</td><td>Check cooler fan is spinning. Check <code>vcgencmd get_throttled</code>. Make sure the vent hole is open in the puppet fabric. In extreme cases, enlarge the vent hole.</td></tr>
+        <tr><td>API returns "SUBJECT DEFIES CLASSIFICATION"</td><td>This is the fallback — either OpenAI refused or there's no internet. Check WiFi with <code>ping google.com</code>. Check the API key in <code>.env</code>.</td></tr>
+        <tr><td>Kiosk mode doesn't start on boot</td><td><code>sudo systemctl status bigbird</code> to see errors. Check <code>journalctl -u bigbird -n 50</code> for logs. Verify <code>DISPLAY=:0</code> is set in the service file.</td></tr>
+        <tr><td>Chromium shows "Restore pages" dialog</td><td>The <code>--disable-session-crashed-bubble</code> and <code>--disable-restore-session-state</code> flags in <code>start.sh</code> should prevent this. If it still happens, delete <code>~/.config/chromium/Default/Preferences</code>.</td></tr>
+        <tr><td>Speaker dies during event</td><td>Verify the Micro USB charging cable is plugged in (power strip USB-A → speaker). The speaker should charge while playing audio.</td></tr>
+        <tr><td>Evaluation loop hangs</td><td>Check server logs: <code>journalctl -u bigbird -f</code>. Most likely an API timeout — the fallback should handle it, but check WiFi stability.</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<footer>
+  Big Bird Is Watching You — "The Game of Democracy" at Harvey Mudd College / Claremont Colleges
+</footer>
+
+<script>
+// ---- Step checkbox persistence ----
+function toggleStep(el) {
+  el.classList.toggle('checked');
+  var step = el.closest('.step');
+  step.classList.toggle('done', el.classList.contains('checked'));
+  saveState();
+  updateProgress();
+}
+
+function saveState() {
+  var checks = document.querySelectorAll('.step-check');
+  var state = [];
+  checks.forEach(function(c) { state.push(c.classList.contains('checked')); });
+  localStorage.setItem('bigbird-build-progress', JSON.stringify(state));
+}
+
+function loadState() {
+  var raw = localStorage.getItem('bigbird-build-progress');
+  if (!raw) return;
+  var state = JSON.parse(raw);
+  var checks = document.querySelectorAll('.step-check');
+  checks.forEach(function(c, i) {
+    if (state[i]) {
+      c.classList.add('checked');
+      c.closest('.step').classList.add('done');
+    }
+  });
+}
+
+function updateProgress() {
+  var total = document.querySelectorAll('[data-step]').length;
+  var done = document.querySelectorAll('.step-check.checked').length;
+  var pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = done + ' / ' + total + ' steps complete';
+}
+
+loadState();
+updateProgress();
+</script>
+
+</body>
+</html>

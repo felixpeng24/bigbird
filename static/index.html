@@ -10,39 +10,73 @@
     <div id="container">
         <!-- IDLE phase -->
         <div id="phase-IDLE" class="phase active">
-            <h1>BIG BIRD IS WATCHING YOU</h1>
+            <div class="idle-title-block">
+                <h1 class="title-main">BIG BIRD</h1>
+                <h1 class="title-sub">IS WATCHING YOU</h1>
+            </div>
+            <div class="camera-wrapper">
+                <img id="camera-feed" src="/api/video_feed" alt="Camera Feed">
+                <div class="camera-corner tl"></div>
+                <div class="camera-corner tr"></div>
+                <div class="camera-corner bl"></div>
+                <div class="camera-corner br"></div>
+                <div class="rec-indicator">● REC</div>
+            </div>
             <p class="prompt">PRESS THE BUTTON TO BE EVALUATED</p>
-            <img id="camera-feed" src="/api/video_feed" alt="Camera Feed">
         </div>
 
         <!-- CAPTURING phase -->
         <div id="phase-CAPTURING" class="phase">
-            <h1>CAPTURING</h1>
-            <p class="phase-label">Hold still...</p>
+            <div class="card capturing-card">
+                <div class="flash-overlay"></div>
+                <h2>📸 CAPTURING SUBJECT</h2>
+                <p class="phase-label">HOLD STILL FOR EVALUATION</p>
+                <div class="capture-dots">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+            </div>
         </div>
 
         <!-- ANALYZING phase -->
         <div id="phase-ANALYZING" class="phase">
-            <h1>ANALYZING</h1>
-            <p class="phase-label">Processing your image...</p>
+            <div class="card analyzing-card">
+                <h2>🔍 SUBJECT ANALYSIS</h2>
+                <div id="demographic-list"></div>
+                <div id="refusal-message" class="hidden">
+                    <p class="refusal-text">⚠️ SUBJECT DEFIES CLASSIFICATION</p>
+                </div>
+            </div>
         </div>
 
         <!-- CALCULATING phase -->
         <div id="phase-CALCULATING" class="phase">
-            <h1>CALCULATING</h1>
-            <p class="phase-label">Computing results...</p>
+            <div class="card calculating-card">
+                <h2>⚙️ COMPUTING LEADERSHIP INDEX</h2>
+                <div id="jargon-container"></div>
+                <div class="progress-bar-container">
+                    <div id="calculation-progress" class="progress-bar"></div>
+                </div>
+            </div>
         </div>
 
         <!-- REVEALING phase -->
         <div id="phase-REVEALING" class="phase">
-            <h1>REVEALING</h1>
-            <p class="phase-label">Here it comes...</p>
+            <div class="reveal-container">
+                <h2 class="reveal-header">YOUR LEADERSHIP INDEX</h2>
+                <div class="score-card">
+                    <div id="score-display" class="score-text"></div>
+                </div>
+            </div>
         </div>
 
         <!-- RESETTING phase -->
         <div id="phase-RESETTING" class="phase">
-            <h1>RESETTING</h1>
-            <p class="phase-label">Returning to idle...</p>
+            <div class="card resetting-card">
+                <h2>✅ EVALUATION COMPLETE</h2>
+                <p class="phase-label">RETURNING TO SURVEILLANCE MODE</p>
+            </div>
         </div>
 
         <!-- Debug status -->
