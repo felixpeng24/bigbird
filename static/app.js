@@ -220,16 +220,27 @@
         switch (phase) {
             case "CAPTURING":
                 cancelTTS();
-                speak("Hold still. Capturing subject for evaluation.");
+                speak("Target acquired.");
                 break;
 
             case "ANALYZING":
-                if (phaseData.demographics) {
+                if (phaseData.transition) {
+                    // Show transition message before calculating
+                    var transMsg = document.getElementById("transition-message");
+                    if (transMsg) {
+                        transMsg.classList.remove("hidden");
+                        speak("Using detected attributes to calculate Leadership Index.");
+                    }
+                } else if (phaseData.demographics) {
+                    var transMsg2 = document.getElementById("transition-message");
+                    if (transMsg2) transMsg2.classList.add("hidden");
                     revealDemographics(phaseData.demographics);
                 }
                 break;
 
             case "CALCULATING":
+                var transMsgCalc = document.getElementById("transition-message");
+                if (transMsgCalc) transMsgCalc.classList.add("hidden");
                 runCalculationTheater();
                 break;
 
@@ -250,6 +261,8 @@
                 if (demoList) demoList.innerHTML = "";
                 var refusal = document.getElementById("refusal-message");
                 if (refusal) refusal.classList.add("hidden");
+                var transIdle = document.getElementById("transition-message");
+                if (transIdle) transIdle.classList.add("hidden");
                 var jargon = document.getElementById("jargon-container");
                 if (jargon) jargon.innerHTML = "";
                 var scoreEl = document.getElementById("score-display");

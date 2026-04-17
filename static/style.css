@@ -29,8 +29,8 @@
     --red: #e03030;
     --green: #5cb85c;
 
-    --font-display: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', cursive;
-    --font-body: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', cursive;
+    --font-display: 'Helvetica Neue', 'Arial', sans-serif;
+    --font-body: 'Helvetica Neue', 'Arial', sans-serif;
 
     --radius-sm: 10px;
     --radius-md: 16px;
@@ -323,6 +323,15 @@ h2 {
     20%, 80% { transform: translateX(4px); }
     30%, 50%, 70% { transform: translateX(-5px); }
     40%, 60% { transform: translateX(5px); }
+}
+
+/* Transition message */
+.transition-text {
+    font-size: 1.3rem;
+    color: var(--gold);
+    margin-top: 1.2rem;
+    animation: phaseIn 0.35s ease-out;
+    letter-spacing: 0.05em;
 }
 
 .hidden { display: none !important; }

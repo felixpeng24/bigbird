@@ -1,9 +1,9 @@
 """Procedural score generation for Big Bird's Leadership Index.
 
-Distribution per D009:
-  50% normal real numbers (random decimals/integers)
-  25% irrational compositions (π, e, √n, φ, ln(n), etc.)
-  25% wild/nonsensical expressions (imaginary vectors, trig combos, set theory)
+Distribution:
+  75% normal real numbers (random decimals/integers)
+  12.5% irrational compositions (π, e, √n, φ, ln(n), etc.)
+  12.5% wild/nonsensical expressions (imaginary vectors, trig combos, set theory)
 
 Every score is procedurally constructed — no fixed pool, no two structurally
 identical. No consecutive duplicates.
@@ -115,15 +115,15 @@ def _generate_wild() -> str:
 def generate_score() -> str:
     """Generate a procedural Leadership Index score.
 
-    50% normal, 25% irrational, 25% wild. Never repeats consecutively.
+    75% normal, 12.5% irrational, 12.5% wild. Never repeats consecutively.
     """
     global _last_score
 
     for _ in range(20):  # safety bound to prevent infinite loop
         roll = random.random()
-        if roll < 0.50:
+        if roll < 0.75:
             score = _generate_normal()
-        elif roll < 0.75:
+        elif roll < 0.875:
             score = _generate_irrational()
         else:
             score = _generate_wild()

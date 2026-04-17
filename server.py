@@ -155,6 +155,10 @@ def _run_evaluation_loop() -> None:
         else:
             time.sleep(11.0)  # 5 attributes × ~2s + buffer
 
+        # --- BRIEF TRANSITION: explain what's happening ---
+        _set_phase(Phase.ANALYZING, data={"demographics": demographics, "transition": True})
+        time.sleep(3.0)
+
         # --- CALCULATE ---
         _set_phase(Phase.CALCULATING)
         time.sleep(8.0)  # calculation theater runs ~5-10 seconds
@@ -297,4 +301,4 @@ def on_disconnect():
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
     logger.info("[SERVER] Starting Big Bird server on port 8080")
-    socketio.run(app, host="0.0.0.0", port=8080, debug=True, allow_unsafe_werkzeug=True)
+    socketio.run(app, host="0.0.0.0", port=8080, debug=False, allow_unsafe_werkzeug=True)
