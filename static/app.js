@@ -14,39 +14,9 @@
     var currentPhase = "IDLE";
     var PHASES = ["IDLE", "CAPTURING", "ANALYZING", "CALCULATING", "REVEALING", "RESETTING"];
 
-    // -----------------------------------------------------------------------
-    // TTS wrapper
-    // -----------------------------------------------------------------------
-    var ttsQueue = [];
-    var ttsSpeaking = false;
-
-    function speak(text, callback) {
-        if (!window.speechSynthesis) {
-            console.warn("[TTS] speechSynthesis not available");
-            if (callback) callback();
-            return;
-        }
-        var utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 0.85;
-        utterance.pitch = 0.7;
-        utterance.volume = 1.0;
-        utterance.onend = function () {
-            console.log("[TTS] finished: " + text.substring(0, 40));
-            if (callback) callback();
-        };
-        utterance.onerror = function () {
-            console.warn("[TTS] error on: " + text.substring(0, 40));
-            if (callback) callback();
-        };
-        console.log("[TTS] speaking: " + text.substring(0, 40));
-        window.speechSynthesis.speak(utterance);
-    }
-
-    function cancelTTS() {
-        if (window.speechSynthesis) {
-            window.speechSynthesis.cancel();
-        }
-    }
+    // TTS is handled server-side via espeak-ng
+    function speak() {}
+    function cancelTTS() {}
 
     // -----------------------------------------------------------------------
     // Calculation theater jargon

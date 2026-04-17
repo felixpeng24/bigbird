@@ -20,8 +20,9 @@ from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, request, send_from_directory
 from flask_socketio import SocketIO, emit
 
+from audio import speak, speak_sync
 from hardware import create_hardware
-from prompts import build_messages, parse_response, REFUSAL_FALLBACK
+from prompts import build_messages, parse_response, REFUSAL_FALLBACK, DEMOGRAPHIC_LABELS, DEMOGRAPHIC_KEYS
 from scores import generate_score
 
 # ---------------------------------------------------------------------------
@@ -131,8 +132,9 @@ def _run_evaluation_loop() -> None:
     CAPTURING → ANALYZING → CALCULATING → REVEALING → RESETTING → IDLE
     """
     try:
-        # Brief pause in CAPTURING phase (let the frontend show "hold still")
-        time.sleep(1.0)
+        # Brief pause in CAPTURING phase
+        speak_sync("Target acquired.")
+        time.sleep(0.5)
 
         # --- CAPTURE ---
         frame = camera.capture_frame()
@@ -149,27 +151,38 @@ def _run_evaluation_loop() -> None:
         # Send demographics to frontend
         _set_phase(Phase.ANALYZING, data={"demographics": demographics})
 
-        # Wait for frontend to finish the demographic reveal (~12s for 6 attributes at 2s each)
+        # Speak demographics one by one
         if demographics.get("refused"):
-            time.sleep(3.0)  # shorter pause for refusal message
+            speak_sync("Subject defies classification.")
+            time.sleep(1.0)
         else:
-            time.sleep(11.0)  # 5 attributes × ~2s + buffer
+            speak_sync("Subject analysis complete. Displaying results.")
+            time.sleep(1.0)
+            for key in DEMOGRAPHIC_KEYS:
+                value = demographics.get(key, "UNKNOWN")
+                label = DEMOGRAPHIC_LABELS.get(key, key).lower().replace("_", " ")
+                speak_sync(f"{label}: {value}")
+                time.sleep(0.5)
 
         # --- BRIEF TRANSITION: explain what's happening ---
         _set_phase(Phase.ANALYZING, data={"demographics": demographics, "transition": True})
-        time.sleep(3.0)
+        speak_sync("Using detected attributes to calculate Leadership Index.")
+        time.sleep(1.0)
 
         # --- CALCULATE ---
         _set_phase(Phase.CALCULATING)
-        time.sleep(8.0)  # calculation theater runs ~5-10 seconds
+        speak_sync("Computing your Leadership Index. Please stand by.")
+        time.sleep(6.0)  # calculation theater runs on frontend
 
         # --- REVEAL ---
         score = generate_score()
         _set_phase(Phase.REVEALING, data={"score": score})
-        time.sleep(6.0)  # hold score on screen ~5 seconds
+        speak_sync(f"Your Leadership Index has been calculated.")
+        time.sleep(5.0)
 
         # --- RESET ---
         _set_phase(Phase.RESETTING)
+        speak_sync("Evaluation complete. Returning to surveillance mode.")
         time.sleep(2.0)
 
         # --- IDLE ---

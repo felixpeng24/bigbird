@@ -28,10 +28,11 @@ sudo apt-get update -qq
 sudo apt-get install -y -qq \
     python3-pip \
     python3-venv \
-    chromium-browser \
+    chromium \
     unclutter \
     libcamera-apps \
-    python3-picamera2
+    python3-picamera2 \
+    espeak-ng
 
 # -----------------------------------------------------------------------
 # Python dependencies
