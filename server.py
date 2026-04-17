@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, request, send_from_directory
 from flask_socketio import SocketIO, emit
 
-from audio import speak, speak_sync
+from audio import speak, speak_sync, play_test_sound
 from hardware import create_hardware
 from prompts import build_messages, parse_response, REFUSAL_FALLBACK, DEMOGRAPHIC_LABELS, DEMOGRAPHIC_KEYS
 from scores import generate_score
@@ -132,6 +132,9 @@ def _run_evaluation_loop() -> None:
     CAPTURING → ANALYZING → CALCULATING → REVEALING → RESETTING → IDLE
     """
     try:
+        # Audio test — remove once audio is confirmed working
+        play_test_sound()
+
         # Brief pause in CAPTURING phase
         speak_sync("Target acquired.")
         time.sleep(0.5)
@@ -151,23 +154,25 @@ def _run_evaluation_loop() -> None:
         # Send demographics to frontend
         _set_phase(Phase.ANALYZING, data={"demographics": demographics})
 
-        # Speak demographics one by one
+        # Speak demographics, timed to match frontend reveal (1.8s per attribute)
         if demographics.get("refused"):
             speak_sync("Subject defies classification.")
-            time.sleep(1.0)
+            time.sleep(3.0)
         else:
             speak_sync("Subject analysis complete. Displaying results.")
-            time.sleep(1.0)
-            for key in DEMOGRAPHIC_KEYS:
+            for i, key in enumerate(DEMOGRAPHIC_KEYS):
+                # Wait for frontend to reveal this attribute (1.8s delay per)
+                time.sleep(1.8)
                 value = demographics.get(key, "UNKNOWN")
                 label = DEMOGRAPHIC_LABELS.get(key, key).lower().replace("_", " ")
                 speak_sync(f"{label}: {value}")
-                time.sleep(0.5)
+            # Hold demographics on screen for 3 seconds after all are shown
+            time.sleep(3.0)
 
         # --- BRIEF TRANSITION: explain what's happening ---
         _set_phase(Phase.ANALYZING, data={"demographics": demographics, "transition": True})
         speak_sync("Using detected attributes to calculate Leadership Index.")
-        time.sleep(1.0)
+        time.sleep(2.0)
 
         # --- CALCULATE ---
         _set_phase(Phase.CALCULATING)

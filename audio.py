@@ -5,6 +5,7 @@ Falls back silently on Mac/dev where espeak-ng isn't installed.
 """
 
 import logging
+import os
 import shutil
 import subprocess
 import threading
@@ -12,6 +13,19 @@ import threading
 logger = logging.getLogger(__name__)
 
 _HAS_ESPEAK = shutil.which("espeak-ng") is not None
+
+
+def play_test_sound() -> None:
+    """Play the ALSA test sound to verify audio output works."""
+    test_file = "/usr/share/sounds/alsa/Front_Center.wav"
+    if os.path.exists(test_file):
+        try:
+            subprocess.run(["aplay", test_file], timeout=10)
+            logger.info("[AUDIO] test sound played")
+        except Exception as exc:
+            logger.warning("[AUDIO] test sound failed: %s", exc)
+    else:
+        logger.warning("[AUDIO] test file not found: %s", test_file)
 
 
 def speak(text: str) -> None:
@@ -33,12 +47,14 @@ def speak_sync(text: str) -> None:
 def _speak_sync(text: str) -> None:
     """Internal: run espeak-ng subprocess."""
     try:
-        subprocess.run(
+        result = subprocess.run(
             ["espeak-ng", "-v", "en", "-s", "140", "-p", "30", text],
-            capture_output=True,
             timeout=15,
         )
-        logger.debug("[AUDIO] spoke: %s", text[:60])
+        if result.returncode != 0:
+            logger.warning("[AUDIO] espeak-ng returned code %d", result.returncode)
+        else:
+            logger.debug("[AUDIO] spoke: %s", text[:60])
     except subprocess.TimeoutExpired:
         logger.warning("[AUDIO] espeak-ng timed out")
     except Exception as exc:
