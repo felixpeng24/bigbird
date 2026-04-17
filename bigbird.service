@@ -1,6 +1,6 @@
 [Unit]
 Description=Big Bird Is Watching You — Art Installation
-After=network.target graphical.target
+After=network.target graphical.target pipewire.service
 Wants=graphical.target
 
 [Service]
@@ -11,6 +11,7 @@ Environment=XAUTHORITY=/home/pi/.Xauthority
 Environment=XDG_RUNTIME_DIR=/run/user/1000
 Environment=PULSE_SERVER=unix:/run/user/1000/pulse/native
 WorkingDirectory=/home/pi/bigbird
+ExecStartPre=/bin/sleep 10
 ExecStart=/home/pi/bigbird/start.sh
 Restart=on-failure
 RestartSec=5

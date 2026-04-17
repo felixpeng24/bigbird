@@ -45,16 +45,20 @@ def speak_sync(text: str) -> None:
 
 
 def _speak_sync(text: str) -> None:
-    """Internal: run espeak-ng subprocess."""
+    """Internal: run espeak-ng piped through aplay."""
     try:
-        result = subprocess.run(
-            ["espeak-ng", "-v", "en", "-s", "140", "-p", "30", text],
-            timeout=15,
+        # Pipe espeak-ng WAV output through aplay (more reliable audio routing)
+        espeak = subprocess.Popen(
+            ["espeak-ng", "-v", "en", "-s", "140", "-p", "30", "--stdout", text],
+            stdout=subprocess.PIPE,
         )
-        if result.returncode != 0:
-            logger.warning("[AUDIO] espeak-ng returned code %d", result.returncode)
-        else:
-            logger.debug("[AUDIO] spoke: %s", text[:60])
+        aplay = subprocess.Popen(
+            ["aplay"],
+            stdin=espeak.stdout,
+        )
+        espeak.stdout.close()
+        aplay.wait(timeout=15)
+        logger.debug("[AUDIO] spoke: %s", text[:60])
     except subprocess.TimeoutExpired:
         logger.warning("[AUDIO] espeak-ng timed out")
     except Exception as exc:
