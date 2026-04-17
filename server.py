@@ -176,6 +176,7 @@ def _run_evaluation_loop() -> None:
 
         # --- CALCULATE ---
         _set_phase(Phase.CALCULATING)
+        play_test_sound()  # Audio test — remove once confirmed working
         speak_sync("Computing your Leadership Index. Please stand by.")
         time.sleep(6.0)  # calculation theater runs on frontend
 
