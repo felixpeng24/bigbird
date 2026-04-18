@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, request, send_from_directory
 from flask_socketio import SocketIO, emit
 
-from audio import speak, speak_sync, play_test_sound
+from audio import speak, speak_sync
 from hardware import create_hardware
 from prompts import build_messages, parse_response, REFUSAL_FALLBACK, DEMOGRAPHIC_LABELS, DEMOGRAPHIC_KEYS
 from scores import generate_score
@@ -132,9 +132,6 @@ def _run_evaluation_loop() -> None:
     CAPTURING → ANALYZING → CALCULATING → REVEALING → RESETTING → IDLE
     """
     try:
-        # Audio test — remove once audio is confirmed working
-        play_test_sound()
-
         # Brief pause in CAPTURING phase
         speak_sync("Target acquired.")
         time.sleep(0.5)
@@ -176,7 +173,6 @@ def _run_evaluation_loop() -> None:
 
         # --- CALCULATE ---
         _set_phase(Phase.CALCULATING)
-        play_test_sound()  # Audio test — remove once confirmed working
         speak_sync("Computing your Leadership Index. Please stand by.")
         time.sleep(6.0)  # calculation theater runs on frontend
 
