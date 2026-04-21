@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, request, send_from_directory
 from flask_socketio import SocketIO, emit
 
-from audio import speak, speak_sync
+from audio import speak, speak_sync, start_speaker_keep_alive
 from hardware import create_hardware
 from prompts import build_messages, parse_response, REFUSAL_FALLBACK, DEMOGRAPHIC_LABELS, DEMOGRAPHIC_KEYS
 from scores import generate_score
@@ -316,4 +316,5 @@ def on_disconnect():
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
     logger.info("[SERVER] Starting Big Bird server on port 8080")
+    start_speaker_keep_alive()
     socketio.run(app, host="0.0.0.0", port=8080, debug=False, allow_unsafe_werkzeug=True)
