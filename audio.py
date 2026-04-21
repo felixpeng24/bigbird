@@ -8,6 +8,7 @@ import logging
 import os
 import shutil
 import subprocess
+import tempfile
 import threading
 
 logger = logging.getLogger(__name__)
@@ -45,21 +46,30 @@ def speak_sync(text: str) -> None:
 
 
 def _speak_sync(text: str) -> None:
-    """Internal: run espeak-ng piped through aplay."""
+    """Internal: generate WAV via espeak-ng to a temp file, then play with aplay."""
+    tmp_path = None
     try:
-        # Pipe espeak-ng WAV output through aplay (more reliable audio routing)
-        espeak = subprocess.Popen(
-            ["espeak-ng", "-v", "en", "-s", "140", "-p", "30", "--stdout", text],
-            stdout=subprocess.PIPE,
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+            tmp_path = tmp.name
+        # Generate WAV to temp file
+        result = subprocess.run(
+            ["espeak-ng", "-v", "en", "-s", "140", "-p", "30", "-w", tmp_path, text],
+            timeout=10,
+            capture_output=True,
         )
-        aplay = subprocess.Popen(
-            ["aplay"],
-            stdin=espeak.stdout,
-        )
-        espeak.stdout.close()
-        aplay.wait(timeout=15)
+        if result.returncode != 0:
+            logger.warning("[AUDIO] espeak-ng failed: %s", result.stderr.decode(errors="ignore")[:200])
+            return
+        # Play it
+        subprocess.run(["aplay", "-q", tmp_path], timeout=15)
         logger.debug("[AUDIO] spoke: %s", text[:60])
     except subprocess.TimeoutExpired:
-        logger.warning("[AUDIO] espeak-ng timed out")
+        logger.warning("[AUDIO] audio subprocess timed out")
     except Exception as exc:
-        logger.warning("[AUDIO] espeak-ng failed: %s", exc)
+        logger.warning("[AUDIO] audio failed: %s", exc)
+    finally:
+        if tmp_path and os.path.exists(tmp_path):
+            try:
+                os.unlink(tmp_path)
+            except Exception:
+                pass
