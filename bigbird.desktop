@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Big Bird
+Comment=Big Bird Is Watching You — Art Installation
+Exec=__INSTALL_DIR__/start.sh
+Terminal=false
+X-GNOME-Autostart-enabled=true

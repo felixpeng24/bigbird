@@ -7,10 +7,11 @@
 # What it does:
 #   1. Installs system dependencies (unclutter, chromium)
 #   2. Installs Python dependencies
-#   3. Installs the systemd service for auto-boot
-#   4. Enables the service
+#   3. Registers an XDG autostart entry so start.sh launches inside the
+#      user's desktop session (where PipeWire/ALSA audio works).
 #
-# After running, reboot the Pi and the installation starts automatically.
+# After running, reboot the Pi and the installation starts automatically
+# once the desktop logs in.
 
 set -euo pipefail
 
@@ -42,26 +43,34 @@ cd "$SCRIPT_DIR"
 pip3 install --break-system-packages -r requirements.txt
 
 # -----------------------------------------------------------------------
-# Systemd service
+# Remove any previously-installed systemd service (older installs)
 # -----------------------------------------------------------------------
-echo "[SETUP] Installing systemd service..."
-sudo cp bigbird.service /etc/systemd/system/bigbird.service
+if [ -f /etc/systemd/system/bigbird.service ]; then
+    echo "[SETUP] Removing old systemd service..."
+    sudo systemctl disable --now bigbird.service 2>/dev/null || true
+    sudo rm -f /etc/systemd/system/bigbird.service
+    sudo systemctl daemon-reload
+fi
 
-# Update paths in the service file to match actual install location
-ACTUAL_USER=$(whoami)
-sudo sed -i "s|User=pi|User=${ACTUAL_USER}|g" /etc/systemd/system/bigbird.service
-sudo sed -i "s|/home/pi/bigbird|${SCRIPT_DIR}|g" /etc/systemd/system/bigbird.service
-sudo sed -i "s|/home/pi/.Xauthority|/home/${ACTUAL_USER}/.Xauthority|g" /etc/systemd/system/bigbird.service
+# -----------------------------------------------------------------------
+# XDG autostart entry (runs inside the desktop session for working audio)
+# -----------------------------------------------------------------------
+echo "[SETUP] Installing XDG autostart entry..."
+AUTOSTART_DIR="${HOME}/.config/autostart"
+mkdir -p "$AUTOSTART_DIR"
 
-sudo systemctl daemon-reload
-sudo systemctl enable bigbird.service
+chmod +x "${SCRIPT_DIR}/start.sh"
+sed "s|__INSTALL_DIR__|${SCRIPT_DIR}|g" \
+    "${SCRIPT_DIR}/bigbird.desktop" > "${AUTOSTART_DIR}/bigbird.desktop"
+chmod +x "${AUTOSTART_DIR}/bigbird.desktop"
 
 echo ""
 echo "[SETUP] ✓ Installation complete!"
 echo ""
-echo "  To start now:   sudo systemctl start bigbird"
-echo "  To check logs:  journalctl -u bigbird -f"
-echo "  To auto-start:  Already enabled (starts on boot)"
+echo "  Autostart entry: ${AUTOSTART_DIR}/bigbird.desktop"
+echo "  To start now:    ./start.sh"
+echo "  To view logs:    tail -f logs/server.log"
+echo "  To disable:      rm ${AUTOSTART_DIR}/bigbird.desktop"
 echo ""
 echo "  Make sure .env contains OPENAI_API_KEY before starting."
-echo "  Reboot to verify auto-start works."
+echo "  Reboot to verify auto-start works — it fires once the desktop logs in."
